@@ -1,21 +1,22 @@
 // swift-tools-version: 6.1
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "ChessboardKit",
+    platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "ChessboardKit",
             targets: ["ChessboardKit"]),
     ],
+    dependencies: [.package(url: "https://github.com/aperechnev/ChessKit", from: "1.3.7")],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "ChessboardKit"),
-
-    ]
+        .target(name: "ChessboardKit",
+                dependencies: ["ChessKit"],
+                resources: [
+                    .process("Assets/Pieces/uscf")
+                ])
+    ],
+    swiftLanguageModes: [.v5, .v6]
 )
