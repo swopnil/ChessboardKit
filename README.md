@@ -660,7 +660,7 @@ Preferably, donating USDT or USDC is recommended but you can donate any of the a
 
 ## ❤️ Buy MacsyZones to support me ❤️
 
-You can buy my [MacsyZones](https://macsyzones) app to support me. MacsyZones is a revolutionary window manager for macOS.
+You can buy my [MacsyZones](https://macsyzones.com) app to support me. MacsyZones is a revolutionary window manager for macOS.
 
 ## Contributing
 
