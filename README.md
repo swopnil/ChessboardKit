@@ -52,6 +52,7 @@ ChessboardKit renders the chessboard based on the provided FEN string and update
   - [Usage](#usage)
     - [Setting Up the Chessboard](#setting-up-the-chessboard)
     - [Handling Moves](#handling-moves)
+      - [Making Moves](#making-moves)
     - [Board Size](#board-size)
     - [Customizing the Chessboard](#customizing-the-chessboard)
     - [Advanced Features](#advanced-features)
@@ -173,6 +174,9 @@ Chessboard(chessboardModel: chessboardModel)
 
 You can handle moves using the `onMove` callback:
 
+> [!NOTE]
+> The `promotionPiece` parameter will be `nil` if the move is not a promotion.
+
 ```swift
 Chessboard(chessboardModel: chessboardModel)
     .onMove { move, isLegal, from, to, lan, promotionPiece in
@@ -180,8 +184,29 @@ Chessboard(chessboardModel: chessboardModel)
     }
 ```
 
+> [!IMPORTANT]
+> ChessboardKit doesn't perform the move on chess engine automatically. You need to handle the move logic in your app, such as updating the chess engine state and the chessboard model. **Follow the example below to see how to handle moves.**
+
+#### Making Moves
+
+When your `onMove` callback is called, you need to perform the move with the chess engine and update the chessboard model with the new FEN string:
+
+```swift
+.onMove { move, isLegal, from, to, lan, promotionPiece in
+    print("Move: Fen: \(chessboardModel.fen) - Lan: \(lan)")
+    
+    if !isLegal {
+        print("Illegal move: \(lan)")
+        return
+    }
+    
+    chessboardModel.game.make(move: move)
+    chessboardModel.setFen(FenSerialization.default.serialize(position: chessboardModel.game.position), lan: lan)
+}
+```
+
 > [!NOTE]
-> The `promotionPiece` parameter will be `nil` if the move is not a promotion.
+> You can see what `chessboardModel.game` has for doing more.
 
 ### Board Size
 
