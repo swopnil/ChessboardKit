@@ -108,7 +108,7 @@ public class FenValidation {
         
         guard let fileChar = square.first, let rankChar = square.last else { return false }
         
-        if !"hgfedcba".contains(fileChar) {
+        if !"abcdefgh".contains(fileChar) {
             return false
         }
         

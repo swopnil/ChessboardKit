@@ -128,7 +128,7 @@ public class ChessboardModel {
         let fileChar = square.first!
         let rankChar = square.last!
         
-        let file = "hgfedcba".firstIndex(of: fileChar)?.utf16Offset(in: "hgfedcba")
+        let file = "abcdefgh".firstIndex(of: fileChar)?.utf16Offset(in: "abcdefgh")
         let rank = Int(String(rankChar))
         
         guard let file = file, let rank = rank else {
@@ -455,7 +455,7 @@ public struct Chessboard: View {
     }
     
     func rowLabelView(row: Int) -> some View {
-        let displayRow = chessboardModel.shouldFlipBoard ? row : (7 - row)
+        let displayRow = chessboardModel.shouldFlipBoard ? (7 - row) : row
         let labelSize = chessboardModel.size / 32
         let squareSize = chessboardModel.size / 8
         
@@ -474,7 +474,7 @@ public struct Chessboard: View {
         let labelSize = chessboardModel.size / 32
         let squareSize = chessboardModel.size / 8
         
-        return Text(["h", "g", "f", "e", "d", "c", "b", "a"][displayColumn])
+        return Text(["a", "b", "c", "d", "e", "f", "g", "h"][displayColumn])
             .font(.system(size: labelSize))
             .foregroundColor(chessboardModel.colorScheme.label)
             .frame(width: squareSize, height: labelSize, alignment: .center)
@@ -678,8 +678,8 @@ private struct ChessPieceView: View {
             let sourceRow = selectedSquare.row
             let sourceColumn = selectedSquare.column
             
-            let sourceSquare = "\(Character(UnicodeScalar(104 - sourceColumn)!))\(sourceRow + 1)"
-            let targetSquare = "\(Character(UnicodeScalar(104 - square.column)!))\(square.row + 1)"
+            let sourceSquare = "\(Character(UnicodeScalar(sourceColumn + 97)!))\(sourceRow + 1)"
+            let targetSquare = "\(Character(UnicodeScalar(square.column + 97)!))\(square.row + 1)"
             
             let lan = "\(sourceSquare)\(targetSquare)"
             let move = Move(string: lan)
@@ -761,8 +761,8 @@ private struct ChessPieceView: View {
                 let targetColumn = chessboardModel.shouldFlipBoard ? square.column - columnOffset : square.column + columnOffset
                 let targetRow = chessboardModel.shouldFlipBoard ? square.row + rowOffset : square.row - rowOffset
                 
-                let sourceSquare = "\(Character(UnicodeScalar(104 - square.column)!))\(square.row + 1)"
-                let targetSquare = "\(Character(UnicodeScalar(104 - targetColumn)!))\(targetRow + 1)"
+                let sourceSquare = "\(Character(UnicodeScalar(square.column + 97)!))\(square.row + 1)"
+                let targetSquare = "\(Character(UnicodeScalar(targetColumn + 97)!))\(targetRow + 1)"
                 
                 let lan = "\(sourceSquare)\(targetSquare)"
                 let move = Move(string: lan)
