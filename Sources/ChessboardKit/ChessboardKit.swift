@@ -79,12 +79,15 @@ public class ChessboardModel {
     public init(fen: String = EMPTY_FEN,
                 perspective: PieceColor = .white,
                 colorScheme: ChessboardColorScheme = .light,
-                allowOpponentMove: Bool = false)
+                allowOpponentMove: Bool = false),
+                pieceStyle: String = "USCF"
+
     {
         self.game = Game(position: FenSerialization.default.deserialize(fen: fen))
         self.perspective = perspective
         self.colorScheme = colorScheme
         self.allowOpponentMove = allowOpponentMove
+        self.pieceStyle = pieceStyle
     }
     
     public var onMove: (Move, Bool, String, String, String, PieceKind? ) -> Void = { _, _, _, _, _, _ in }
@@ -626,40 +629,41 @@ private struct ChessPieceView: View {
     }
     
     var body: some View {
-        ZStack {
-            if let piece {
-                let imageName = "\(piece.color == PieceColor.white ? "w" : "b")\(String(describing: piece).uppercased())"
-                
-                AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
-                    if let image = phase.image {
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .scaleEffect(0.85)
-                            .contentShape(Rectangle())
-                    } else if phase.error != nil {
-                        Text("\(piece)")
-                            .foregroundStyle(piece.color == PieceColor.white ? Color.white : Color.black)
-                            .font(.system(size: 18))
-                            .scaledToFit()
-                            .scaleEffect(0.85)
-                            .contentShape(Rectangle())
-                    } else {
-                        ProgressView()
-                            .scaleEffect(0.85)
-                    }
+    ZStack {
+        if let piece {
+            let style = chessboardModel.pieceStyle
+            let imageName = "\(style)/\(piece.color == PieceColor.white ? "w" : "b")\(String(describing: piece).uppercased())"
+            
+            AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
+                if let image = phase.image {
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .scaleEffect(0.85)
+                        .contentShape(Rectangle())
+                } else if phase.error != nil {
+                    Text("\(piece)")
+                        .foregroundStyle(piece.color == PieceColor.white ? Color.white : Color.black)
+                        .font(.system(size: 18))
+                        .scaledToFit()
+                        .scaleEffect(0.85)
+                        .contentShape(Rectangle())
+                } else {
+                    ProgressView()
+                        .scaleEffect(0.85)
                 }
-            } else {
-                Color.clear.contentShape(Rectangle())
             }
+        } else {
+            Color.clear.contentShape(Rectangle())
         }
-        .zIndex(zIndex)
-        .font(.system(size: chessboardModel.size / 8 * 0.75))
-        .frame(width: chessboardModel.size / 8, height: chessboardModel.size / 8)
-        .offset(offset)
-        .onTapGesture(perform: onTapGesture)
-        .gesture(dragGesture)
     }
+    .zIndex(zIndex)
+    .font(.system(size: chessboardModel.size / 8 * 0.75))
+    .frame(width: chessboardModel.size / 8, height: chessboardModel.size / 8)
+    .offset(offset)
+    .onTapGesture(perform: onTapGesture)
+    .gesture(dragGesture)
+}
     
     func onTapGesture() {
         if chessboardModel.movingPiece != nil {
