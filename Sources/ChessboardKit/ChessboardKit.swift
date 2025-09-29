@@ -49,6 +49,7 @@ public class ChessboardModel {
     public var size: CGFloat = 0
     
     public var colorScheme: ChessboardColorScheme = .light
+    public var pieceStyle: PieceStyle = .uscf
     
     public var perspective: PieceColor
     public var turn: PieceColor { game.position.state.turn }
@@ -79,12 +80,26 @@ public class ChessboardModel {
     public init(fen: String = EMPTY_FEN,
                 perspective: PieceColor = .white,
                 colorScheme: ChessboardColorScheme = .light,
-                allowOpponentMove: Bool = false)
+                allowOpponentMove: Bool = false,
+                pieceStyle: PieceStyle = .uscf)
     {
         self.game = Game(position: FenSerialization.default.deserialize(fen: fen))
         self.perspective = perspective
         self.colorScheme = colorScheme
         self.allowOpponentMove = allowOpponentMove
+        self.pieceStyle = pieceStyle
+    }
+    
+    public init(fen: String = EMPTY_FEN,
+                perspective: PieceColor = .white,
+                theme: ChessboardTheme,
+                allowOpponentMove: Bool = false)
+    {
+        self.game = Game(position: FenSerialization.default.deserialize(fen: fen))
+        self.perspective = perspective
+        self.colorScheme = theme.colorScheme
+        self.allowOpponentMove = allowOpponentMove
+        self.pieceStyle = theme.pieceStyle
     }
     
     public var onMove: (Move, Bool, String, String, String, PieceKind? ) -> Void = { _, _, _, _, _, _ in }
@@ -272,6 +287,19 @@ public class ChessboardModel {
             inWaiting = false
         }
     }
+    
+    public func setTheme(_ theme: ChessboardTheme) {
+        self.colorScheme = theme.colorScheme
+        self.pieceStyle = theme.pieceStyle
+    }
+    
+    public func setColorScheme(_ colorScheme: ChessboardColorScheme) {
+        self.colorScheme = colorScheme
+    }
+    
+    public func setPieceStyle(_ pieceStyle: PieceStyle) {
+        self.pieceStyle = pieceStyle
+    }
 }
 
 private struct MovingPieceView: View {
@@ -391,9 +419,10 @@ public struct Chessboard: View {
                             chessboardModel.absentePromotionPicker()
                         } label: {
                             let imageName = "\(chessboardModel.perspective == PieceColor.white ? "w" : "b")\(String(describing: piece).uppercased())"
+                            let pieceImagePath = "\(chessboardModel.pieceStyle.folderName)/\(imageName)"
                             
                             ZStack {
-                                AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
+                                AsyncImage(url: Bundle.module.url(forResource: pieceImagePath, withExtension: "png")) { phase in
                                     if let image = phase.image {
                                         image
                                             .resizable()
@@ -629,8 +658,9 @@ private struct ChessPieceView: View {
         ZStack {
             if let piece {
                 let imageName = "\(piece.color == PieceColor.white ? "w" : "b")\(String(describing: piece).uppercased())"
+                let pieceImagePath = "\(chessboardModel.pieceStyle.folderName)/\(imageName)"
                 
-                AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
+                AsyncImage(url: Bundle.module.url(forResource: pieceImagePath, withExtension: "png")) { phase in
                     if let image = phase.image {
                         image
                             .resizable()

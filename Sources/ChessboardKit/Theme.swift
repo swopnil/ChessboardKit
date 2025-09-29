@@ -158,3 +158,43 @@ public extension ChessboardColorScheme where Self == ChessboardColorSchemes.Yell
 public extension ChessboardColorScheme where Self == ChessboardColorSchemes.Purple {
     static var purple: ChessboardColorSchemes.Purple { ChessboardColorSchemes.purple }
 }
+
+public enum PieceStyle: String, CaseIterable, Sendable {
+    case uscf = "uscf"
+    case classic = "classic"
+    case modern = "modern"
+    case wood = "wood"
+    case marble = "marble"
+    
+    public var displayName: String {
+        switch self {
+        case .uscf: return "USCF"
+        case .classic: return "Classic"
+        case .modern: return "Modern" 
+        case .wood: return "Wood"
+        case .marble: return "Marble"
+        }
+    }
+    
+    public var folderName: String {
+        return self.rawValue
+    }
+}
+
+public struct ChessboardTheme: Sendable {
+    public let colorScheme: ChessboardColorScheme
+    public let pieceStyle: PieceStyle
+    
+    public init(colorScheme: ChessboardColorScheme, pieceStyle: PieceStyle) {
+        self.colorScheme = colorScheme
+        self.pieceStyle = pieceStyle
+    }
+}
+
+public struct ChessboardThemes {
+    public static let defaultLight = ChessboardTheme(colorScheme: .light, pieceStyle: .uscf)
+    public static let defaultDark = ChessboardTheme(colorScheme: .dark, pieceStyle: .uscf)
+    public static let classicWood = ChessboardTheme(colorScheme: .orange, pieceStyle: .wood)
+    public static let modernBlue = ChessboardTheme(colorScheme: .blue, pieceStyle: .modern)
+    public static let elegantMarble = ChessboardTheme(colorScheme: .purple, pieceStyle: .marble)
+}
