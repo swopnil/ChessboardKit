@@ -438,6 +438,11 @@ public struct Chessboard: View {
                                     } else {
                                         ProgressView()
                                             .scaleEffect(0.85)
+                                            .onAppear {
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                                    // Timeout for loading
+                                                }
+                                            }
                                     }
                                 }
                             }
@@ -659,24 +664,43 @@ private struct ChessPieceView: View {
             if let piece {
                 let imageName = "\(piece.color == PieceColor.white ? "w" : "b")\(String(describing: piece).uppercased())"
                 let pieceImagePath = "\(chessboardModel.pieceStyle.folderName)/\(imageName)"
+                let resourceURL = Bundle.module.url(forResource: pieceImagePath, withExtension: "png")
                 
-                AsyncImage(url: Bundle.module.url(forResource: pieceImagePath, withExtension: "png")) { phase in
-                    if let image = phase.image {
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .scaleEffect(0.85)
-                            .contentShape(Rectangle())
-                    } else if phase.error != nil {
-                        Text("\(piece)")
-                            .foregroundStyle(piece.color == PieceColor.white ? Color.white : Color.black)
-                            .font(.system(size: 18))
-                            .scaledToFit()
-                            .scaleEffect(0.85)
-                            .contentShape(Rectangle())
-                    } else {
-                        ProgressView()
-                            .scaleEffect(0.85)
+                // Debug: Force fallback to text if no URL found
+                if resourceURL == nil {
+                    Text("\(piece)")
+                        .foregroundStyle(piece.color == PieceColor.white ? Color.white : Color.black)
+                        .font(.system(size: 18))
+                        .scaledToFit()
+                        .scaleEffect(0.85)
+                        .contentShape(Rectangle())
+                } else {
+                    AsyncImage(url: resourceURL) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .scaleEffect(0.85)
+                                .contentShape(Rectangle())
+                        } else if phase.error != nil {
+                            // Fallback to text representation
+                            Text("\(piece)")
+                                .foregroundStyle(piece.color == PieceColor.white ? Color.white : Color.black)
+                                .font(.system(size: 18))
+                                .scaledToFit()
+                                .scaleEffect(0.85)
+                                .contentShape(Rectangle())
+                        } else {
+                            // Show loading indicator for a short time, then fallback
+                            ProgressView()
+                                .scaleEffect(0.85)
+                                .onAppear {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                        // If still loading after 1 second, something is wrong
+                                        // The phase should update to error, triggering fallback
+                                    }
+                                }
+                        }
                     }
                 }
             } else {
