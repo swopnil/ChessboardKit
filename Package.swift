@@ -15,7 +15,7 @@ let package = Package(
         .target(name: "ChessboardKit",
                 dependencies: ["ChessKit"],
                 resources: [
-                    .process("Assets")
+                    .copy("Assets/Pieces/uscf")
                 ])
     ],
     swiftLanguageModes: [.v5, .v6]
