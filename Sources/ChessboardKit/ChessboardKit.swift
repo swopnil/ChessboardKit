@@ -11,11 +11,61 @@
 //
 
 import SwiftUI
-
+import WebKit
 import ChessKit
 
 public let EMPTY_FEN = "8/8/8/8/8/8/8/8 w - - 0 1"
 public let INITIAL_FEN = "rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1"
+
+struct SVGImageView: View {
+    let url: URL?
+    let size: CGSize
+    
+    var body: some View {
+        if let url = url,
+           let data = try? Data(contentsOf: url),
+           let svgString = String(data: data, encoding: .utf8) {
+            WebView(htmlContent: svgHTML(svgString))
+                .frame(width: size.width, height: size.height)
+        } else {
+            Color.clear
+                .frame(width: size.width, height: size.height)
+        }
+    }
+    
+    private func svgHTML(_ svgContent: String) -> String {
+        """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                svg { max-width: 100%; max-height: 100%; }
+            </style>
+        </head>
+        <body>
+            \(svgContent)
+        </body>
+        </html>
+        """
+    }
+}
+
+struct WebView: UIViewRepresentable {
+    let htmlContent: String
+    
+    func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView()
+        webView.isOpaque = false
+        webView.backgroundColor = UIColor.clear
+        webView.scrollView.backgroundColor = UIColor.clear
+        return webView
+    }
+    
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        webView.loadHTMLString(htmlContent, baseURL: nil)
+    }
+}
 
 public struct BoardSquare: Identifiable, Hashable {
     public var row: Int
@@ -422,27 +472,40 @@ public struct Chessboard: View {
                             let pieceImagePath = "\(chessboardModel.pieceStyle.folderName)/\(imageName)"
                             
                             ZStack {
-                                AsyncImage(url: Bundle.module.url(forResource: pieceImagePath, withExtension: chessboardModel.pieceStyle.fileExtension)) { phase in
-                                    if let image = phase.image {
-                                        image
-                                            .resizable()
-                                            .frame(width: chessboardModel.size / 8,
-                                                    height: chessboardModel.size / 8)
-                                            .contentShape(Rectangle())
-                                    } else if phase.error != nil {
-                                        Text("\(piece)")
-                                            .foregroundStyle(piece == "w" ? Color.white : Color.black)
-                                            .font(.system(size: 18))
-                                            .scaledToFit()
-                                            .contentShape(Rectangle())
-                                    } else {
-                                        ProgressView()
-                                            .scaleEffect(0.85)
-                                            .onAppear {
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                                    // Timeout for loading
+                                let resourceURL = Bundle.module.url(forResource: pieceImagePath, withExtension: chessboardModel.pieceStyle.fileExtension)
+                                
+                                if resourceURL == nil {
+                                    Text("\(piece)")
+                                        .foregroundStyle(piece == "w" ? Color.white : Color.black)
+                                        .font(.system(size: 18))
+                                        .scaledToFit()
+                                        .contentShape(Rectangle())
+                                } else if chessboardModel.pieceStyle.fileExtension == "svg" {
+                                    SVGImageView(url: resourceURL, size: CGSize(width: chessboardModel.size / 8, height: chessboardModel.size / 8))
+                                        .contentShape(Rectangle())
+                                } else {
+                                    AsyncImage(url: resourceURL) { phase in
+                                        if let image = phase.image {
+                                            image
+                                                .resizable()
+                                                .frame(width: chessboardModel.size / 8,
+                                                        height: chessboardModel.size / 8)
+                                                .contentShape(Rectangle())
+                                        } else if phase.error != nil {
+                                            Text("\(piece)")
+                                                .foregroundStyle(piece == "w" ? Color.white : Color.black)
+                                                .font(.system(size: 18))
+                                                .scaledToFit()
+                                                .contentShape(Rectangle())
+                                        } else {
+                                            ProgressView()
+                                                .scaleEffect(0.85)
+                                                .onAppear {
+                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                                        // Timeout for loading
+                                                    }
                                                 }
-                                            }
+                                        }
                                     }
                                 }
                             }
@@ -666,15 +729,21 @@ private struct ChessPieceView: View {
                 let pieceImagePath = "\(chessboardModel.pieceStyle.folderName)/\(imageName)"
                 let resourceURL = Bundle.module.url(forResource: pieceImagePath, withExtension: chessboardModel.pieceStyle.fileExtension)
                 
-                // Debug: Force fallback to text if no URL found
+                // Handle SVG vs PNG files differently
                 if resourceURL == nil {
+                    // No resource found, fall back to text
                     Text("\(piece)")
                         .foregroundStyle(piece.color == PieceColor.white ? Color.white : Color.black)
                         .font(.system(size: 18))
                         .scaledToFit()
                         .scaleEffect(0.85)
                         .contentShape(Rectangle())
+                } else if chessboardModel.pieceStyle.fileExtension == "svg" {
+                    // Use SVG viewer for SVG files
+                    SVGImageView(url: resourceURL, size: CGSize(width: chessboardModel.size / 8 * 0.85, height: chessboardModel.size / 8 * 0.85))
+                        .contentShape(Rectangle())
                 } else {
+                    // Use AsyncImage for PNG files
                     AsyncImage(url: resourceURL) { phase in
                         if let image = phase.image {
                             image
