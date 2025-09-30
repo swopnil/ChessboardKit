@@ -161,6 +161,12 @@ public extension ChessboardColorScheme where Self == ChessboardColorSchemes.Purp
 
 public enum PieceStyle: String, CaseIterable, Sendable {
     case uscf = "uscf"
+    case chess_kaneo = "chess_kaneo"
+    case chess_kaneo_midnight = "chess_kaneo_midnight"
+    case chess_maestro_bw = "chess_maestro_bw"
+    case chess_1Kbyte_gambit = "chess_1Kbyte_gambit"
+    case sittuyin_green_red = "sittuyin_green_red"
+    case sittuyin_black_red = "sittuyin_black_red"
     case classic = "classic"
     case modern = "modern"
     case wood = "wood"
@@ -169,6 +175,12 @@ public enum PieceStyle: String, CaseIterable, Sendable {
     public var displayName: String {
         switch self {
         case .uscf: return "USCF"
+        case .chess_kaneo: return "Kaneo"
+        case .chess_kaneo_midnight: return "Kaneo Midnight"
+        case .chess_maestro_bw: return "Maestro B&W"
+        case .chess_1Kbyte_gambit: return "1K Gambit"
+        case .sittuyin_green_red: return "Sittuyin Green"
+        case .sittuyin_black_red: return "Sittuyin Black"
         case .classic: return "Classic"
         case .modern: return "Modern" 
         case .wood: return "Wood"
@@ -178,6 +190,14 @@ public enum PieceStyle: String, CaseIterable, Sendable {
     
     public var folderName: String {
         return self.rawValue
+    }
+    
+    public var fileExtension: String {
+        switch self {
+        case .uscf: return "png"
+        case .chess_kaneo, .chess_kaneo_midnight, .chess_maestro_bw, .chess_1Kbyte_gambit, .sittuyin_green_red, .sittuyin_black_red: return "svg"
+        case .classic, .modern, .wood, .marble: return "png" // These don't have actual files, will fall back to text
+        }
     }
 }
 

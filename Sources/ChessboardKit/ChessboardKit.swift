@@ -422,7 +422,7 @@ public struct Chessboard: View {
                             let pieceImagePath = "\(chessboardModel.pieceStyle.folderName)/\(imageName)"
                             
                             ZStack {
-                                AsyncImage(url: Bundle.module.url(forResource: pieceImagePath, withExtension: "png")) { phase in
+                                AsyncImage(url: Bundle.module.url(forResource: pieceImagePath, withExtension: chessboardModel.pieceStyle.fileExtension)) { phase in
                                     if let image = phase.image {
                                         image
                                             .resizable()
@@ -664,7 +664,7 @@ private struct ChessPieceView: View {
             if let piece {
                 let imageName = "\(piece.color == PieceColor.white ? "w" : "b")\(String(describing: piece).uppercased())"
                 let pieceImagePath = "\(chessboardModel.pieceStyle.folderName)/\(imageName)"
-                let resourceURL = Bundle.module.url(forResource: pieceImagePath, withExtension: "png")
+                let resourceURL = Bundle.module.url(forResource: pieceImagePath, withExtension: chessboardModel.pieceStyle.fileExtension)
                 
                 // Debug: Force fallback to text if no URL found
                 if resourceURL == nil {
